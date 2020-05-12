@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/xml"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo"
 	"github.com/sdwolfe32/trumail/verifier"
@@ -16,7 +17,7 @@ type Lookup struct {
 	Domain      string   `json:"domain" xml:"domain"`
 	MD5Hash     string   `json:"md5Hash" xml:"md5Hash"`
 	ValidFormat bool     `json:"validFormat" xml:"validFormat"`
-	Deliverable bool     `json:"deliverable" xml:"deliverable"`
+	Deliverable string    `json:"deliverable" xml:"deliverable"`
 	FullInbox   bool     `json:"fullInbox" xml:"fullInbox"`
 	HostExists  bool     `json:"hostExists" xml:"hostExists"`
 	CatchAll    bool     `json:"catchAll" xml:"catchAll"`
@@ -28,8 +29,14 @@ func LookupHandler(v *verifier.Verifier) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Perform the unlimited verification
 		lookup, err := v.Verify(c.Param("email"))
+		deliverable := "true"
 		if err != nil {
-			return FormatEncoder(c, http.StatusInternalServerError, err)
+			if strings.Contains(err.Error(), "Fatal") {
+				return FormatEncoder(c, http.StatusInternalServerError, err)
+			}
+			deliverable = ""
+		} else if !lookup.Deliverable {
+			deliverable = "false"
 		}
 		return FormatEncoder(c, http.StatusOK, &Lookup{
 			Address:     lookup.Address.Address,
@@ -37,7 +44,7 @@ func LookupHandler(v *verifier.Verifier) echo.HandlerFunc {
 			Domain:      lookup.Domain,
 			MD5Hash:     lookup.MD5Hash,
 			ValidFormat: lookup.ValidFormat,
-			Deliverable: lookup.Deliverable,
+			Deliverable: deliverable,
 			FullInbox:   lookup.FullInbox,
 			HostExists:  lookup.HostExists,
 			CatchAll:    lookup.CatchAll,

@@ -5,8 +5,9 @@ import (
 	"net"
 	"os"
 	"strings"
+	"net/http"
 
-	"github.com/entrik/httpclient"
+	"s32x.com/httpclient"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/sdwolfe32/trumail/api"
@@ -41,7 +42,8 @@ func main() {
 // address retrieved via an API call on api.ipify.org
 func retrievePTR() string {
 	// Request the IP from ipify
-	ip, err := httpclient.GetString("https://api.ipify.org/")
+	c := httpclient.New().WithBaseURL("https://api.ipify.org")
+	ip, err := c.Get("/").WithExpectedStatus(http.StatusOK).String()
 	if err != nil {
 		log.Fatal("Failed to retrieve public IP")
 	}

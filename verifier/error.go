@@ -11,8 +11,8 @@ const (
 
 	// Standard Errors
 	ErrTimeout           = "Fatal The connection to the mail server has timed out"
-	ErrNoSuchHost        = "Fatal Mail server does not exist"
-	ErrServerUnavailable = "Fatal Mail server is unavailable"
+	ErrNoSuchHost        = "Mail server does not exist"
+	ErrServerUnavailable = "Mail server is unavailable"
 	ErrBlocked           = "Blocked by mail server"
 
 	// RCPT Errors
@@ -156,7 +156,7 @@ func parseBasicErr(err error) *LookupError {
 	case insContains(errStr, "unavailable"):
 		return newLookupError(ErrServerUnavailable, errStr)
 	default:
-		return newLookupError("Fatal " + errStr, errStr)
+		return newLookupError(errStr, errStr)
 	}
 }
 

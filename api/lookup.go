@@ -2,11 +2,10 @@ package api
 
 import (
 	"encoding/xml"
-	"net/http"
-	"strings"
-
 	"github.com/labstack/echo"
 	"github.com/sdwolfe32/trumail/verifier"
+	"net/http"
+	"strings"
 )
 
 // Lookup contains all output data for an email verification Lookup
@@ -31,7 +30,7 @@ func LookupHandler(v *verifier.Verifier) echo.HandlerFunc {
 		lookup, err := v.Verify(c.Param("email"))
 		deliverable := "true"
 		if err != nil {
-			if strings.Contains(err.Error(), "Fatal") {
+			if strings.HasPrefix(err.Error(), "Fatal") {
 				return FormatEncoder(c, http.StatusInternalServerError, err)
 			}
 			deliverable = ""

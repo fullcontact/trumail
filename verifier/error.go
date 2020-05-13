@@ -41,6 +41,9 @@ func newLookupError(message, details string) *LookupError {
 
 // Error satisfies the error interface
 func (e *LookupError) Error() string {
+	if e == nil {
+		return ""
+	}
 	return fmt.Sprintf("%s : %s", e.Message, e.Details)
 }
 

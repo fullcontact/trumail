@@ -1,4 +1,4 @@
-module github.com/sdwolfe32/trumail
+module github.com/fullcontact/trumail
 
 go 1.14
 

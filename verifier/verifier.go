@@ -33,8 +33,10 @@ func (v *Verifier) Verify(email string) (*Lookup, error) {
 
 	// Attempt to form an SMTP Connection
 	del, err := NewDeliverabler(address.Domain, v.hostname, v.sourceAddr)
-	if err != nil {
-		return &l, ParseSMTPError(err)
+	if le := ParseSMTPError(err); le != nil && le.Fatal {
+		return nil, le
+	} else if err != nil {
+		return &l, le
 	}
 	defer del.Close() // Defer close the SMTP connection
 

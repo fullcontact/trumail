@@ -10,7 +10,7 @@ const (
 	ErrUnexpectedResponse = "Unexpected response from deliverabler"
 
 	// Standard Errors
-	ErrTimeout           = "Fatal The connection to the mail server has timed out"
+	ErrTimeout           = "The connection to the mail server has timed out"
 	ErrNoSuchHost        = "Mail server does not exist"
 	ErrServerUnavailable = "Mail server is unavailable"
 	ErrBlocked           = "Blocked by mail server"
@@ -31,12 +31,13 @@ const (
 type LookupError struct {
 	Message string `json:"message" xml:"message"`
 	Details string `json:"details" xml:"details"`
+	Fatal bool `json:"fatal" xml:"fatal"`
 }
 
 // newLookupError creates a new LookupError reference and
 // returns it
-func newLookupError(message, details string) *LookupError {
-	return &LookupError{message, details}
+func newLookupError(message, details string, fatal bool) *LookupError {
+	return &LookupError{message, details, fatal}
 }
 
 // Error satisfies the error interface
@@ -86,11 +87,11 @@ func ParseSMTPError(err error) *LookupError {
 
 		switch status {
 		case 421:
-			return newLookupError(ErrTryAgainLater, errStr)
+			return newLookupError(ErrTryAgainLater, errStr, false)
 		case 450:
-			return newLookupError(ErrMailboxBusy, errStr)
+			return newLookupError(ErrMailboxBusy, errStr, false)
 		case 451:
-			return newLookupError(ErrExceededMessagingLimits, errStr)
+			return newLookupError(ErrExceededMessagingLimits, errStr, false)
 		case 452:
 			if insContains(errStr,
 				"full",
@@ -98,11 +99,11 @@ func ParseSMTPError(err error) *LookupError {
 				"over quota",
 				"insufficient",
 			) {
-				return newLookupError(ErrFullInbox, errStr)
+				return newLookupError(ErrFullInbox, errStr, false)
 			}
-			return newLookupError(ErrTooManyRCPT, errStr)
+			return newLookupError(ErrTooManyRCPT, errStr, false)
 		case 503:
-			return newLookupError(ErrNeedMAILBeforeRCPT, errStr)
+			return newLookupError(ErrNeedMAILBeforeRCPT, errStr, false)
 		case 550: // 550 is Mailbox Unavailable - usually undeliverable
 			if insContains(errStr,
 				"spamhaus",
@@ -113,17 +114,17 @@ func ParseSMTPError(err error) *LookupError {
 				"blocked",
 				"block list",
 				"denied") {
-				return newLookupError(ErrBlocked, errStr)
+				return newLookupError(ErrBlocked, errStr, true)
 			}
 			return nil
 		case 551:
-			return newLookupError(ErrRCPTHasMoved, errStr)
+			return newLookupError(ErrRCPTHasMoved, errStr, false)
 		case 552:
-			return newLookupError(ErrFullInbox, errStr)
+			return newLookupError(ErrFullInbox, errStr, false)
 		case 553:
-			return newLookupError(ErrNoRelay, errStr)
+			return newLookupError(ErrNoRelay, errStr, false)
 		case 554:
-			return newLookupError(ErrNotAllowed, errStr)
+			return newLookupError(ErrNotAllowed, errStr, false)
 		default:
 			return parseBasicErr(err)
 		}
@@ -148,15 +149,15 @@ func parseBasicErr(err error) *LookupError {
 		"banned",
 		"blocked",
 		"denied"):
-		return newLookupError(ErrBlocked, errStr)
+		return newLookupError(ErrBlocked, errStr, true)
 	case insContains(errStr, "timeout"):
-		return newLookupError(ErrTimeout, errStr)
+		return newLookupError(ErrTimeout, errStr, true)
 	case insContains(errStr, "no such host"):
-		return newLookupError(ErrNoSuchHost, errStr)
+		return newLookupError(ErrNoSuchHost, errStr, false)
 	case insContains(errStr, "unavailable"):
-		return newLookupError(ErrServerUnavailable, errStr)
+		return newLookupError(ErrServerUnavailable, errStr, false)
 	default:
-		return newLookupError(errStr, errStr)
+		return newLookupError(errStr, errStr, false)
 	}
 }
 

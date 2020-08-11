@@ -2,10 +2,9 @@ package api
 
 import (
 	"encoding/xml"
+	"github.com/fullcontact/trumail/verifier"
 	"github.com/labstack/echo"
-	"github.com/sdwolfe32/trumail/verifier"
 	"net/http"
-	"strings"
 )
 
 // Lookup contains all output data for an email verification Lookup
@@ -16,10 +15,11 @@ type Lookup struct {
 	Domain      string   `json:"domain" xml:"domain"`
 	MD5Hash     string   `json:"md5Hash" xml:"md5Hash"`
 	ValidFormat bool     `json:"validFormat" xml:"validFormat"`
-	Deliverable string    `json:"deliverable" xml:"deliverable"`
+	Deliverable bool    `json:"deliverable" xml:"deliverable"`
 	FullInbox   bool     `json:"fullInbox" xml:"fullInbox"`
 	HostExists  bool     `json:"hostExists" xml:"hostExists"`
 	CatchAll    bool     `json:"catchAll" xml:"catchAll"`
+	Message     string   `json:"message" xml:"message"`
 }
 
 // LookupHandler performs a single email verification and returns
@@ -28,25 +28,25 @@ func LookupHandler(v *verifier.Verifier) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Perform the unlimited verification
 		lookup, err := v.Verify(c.Param("email"))
-		deliverable := "true"
-		if err != nil {
-			if strings.HasPrefix(err.Error(), "Fatal") {
-				return FormatEncoder(c, http.StatusInternalServerError, err)
-			}
-			deliverable = ""
-		} else if !lookup.Deliverable {
-			deliverable = "false"
+		statusCode := http.StatusOK
+		statusMessage := "OK"
+		if err != nil && lookup == nil {
+			return FormatEncoder(c, http.StatusInternalServerError, err)
+		} else if err != nil {
+			statusCode = http.StatusInternalServerError
+			statusMessage = err.Error()
 		}
-		return FormatEncoder(c, http.StatusOK, &Lookup{
+		return FormatEncoder(c, statusCode, &Lookup{
 			Address:     lookup.Address.Address,
 			Username:    lookup.Username,
 			Domain:      lookup.Domain,
 			MD5Hash:     lookup.MD5Hash,
 			ValidFormat: lookup.ValidFormat,
-			Deliverable: deliverable,
+			Deliverable: lookup.Deliverable,
 			FullInbox:   lookup.FullInbox,
 			HostExists:  lookup.HostExists,
 			CatchAll:    lookup.CatchAll,
+			Message: 	 statusMessage,
 		})
 	}
 }

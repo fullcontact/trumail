@@ -10,8 +10,8 @@ import (
 	"s32x.com/httpclient"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/sdwolfe32/trumail/api"
-	"github.com/sdwolfe32/trumail/verifier"
+	"github.com/fullcontact/trumail/api"
+	"github.com/fullcontact/trumail/verifier"
 )
 
 var (

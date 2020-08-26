@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/xml"
 	"github.com/fullcontact/trumail/verifier"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 

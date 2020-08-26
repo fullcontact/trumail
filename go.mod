@@ -3,8 +3,8 @@ module github.com/fullcontact/trumail
 go 1.14
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/echo-contrib v0.9.0
+	github.com/labstack/echo/v4 v4.1.6
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/valyala/fasttemplate v1.1.0 // indirect

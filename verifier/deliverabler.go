@@ -21,7 +21,7 @@ type Deliverabler struct {
 // NewDeliverabler generates a new Deliverabler reference
 func NewDeliverabler(domain, hostname, sourceAddr string) (*Deliverabler, error) {
 	// Dial any SMTP server that will accept a connection
-	client, err := mailDialTimeout(domain, time.Duration(50) * time.Second)
+	client, err := mailDialTimeout(domain, time.Duration(40) * time.Second)
 	if err != nil {
 		return nil, err
 	}

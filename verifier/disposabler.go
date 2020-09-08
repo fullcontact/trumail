@@ -8,7 +8,7 @@ import (
 
 // updateInterval is how often we should reach out to update
 // the disposable address map
-const disposableDomainsUrl = "https://raw.githubusercontent.com/fullcontact/trumail/updated-error-handling/disposable_emails.txt"
+const disposableDomainsUrl = "https://raw.githubusercontent.com/fullcontact/trumail/v1.1.1/disposable_emails.txt"
 
 // Disposabler contains the map of known disposable email domains
 type Disposabler struct {

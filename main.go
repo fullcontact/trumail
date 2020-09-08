@@ -3,16 +3,16 @@ package main
 import (
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"strings"
-	"net/http"
 
-	"s32x.com/httpclient"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo-contrib/prometheus"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/fullcontact/trumail/api"
 	"github.com/fullcontact/trumail/verifier"
+	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"s32x.com/httpclient"
 )
 
 var (

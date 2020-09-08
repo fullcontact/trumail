@@ -15,10 +15,11 @@ type Lookup struct {
 	Domain      string   `json:"domain" xml:"domain"`
 	MD5Hash     string   `json:"md5Hash" xml:"md5Hash"`
 	ValidFormat bool     `json:"validFormat" xml:"validFormat"`
-	Deliverable bool    `json:"deliverable" xml:"deliverable"`
+	Deliverable bool     `json:"deliverable" xml:"deliverable"`
 	FullInbox   bool     `json:"fullInbox" xml:"fullInbox"`
 	HostExists  bool     `json:"hostExists" xml:"hostExists"`
 	CatchAll    bool     `json:"catchAll" xml:"catchAll"`
+	Disposable  bool     `json:"disposable" xml:"disposable"`
 	Message     string   `json:"message" xml:"message"`
 }
 
@@ -46,7 +47,8 @@ func LookupHandler(v *verifier.Verifier) echo.HandlerFunc {
 			FullInbox:   lookup.FullInbox,
 			HostExists:  lookup.HostExists,
 			CatchAll:    lookup.CatchAll,
-			Message: 	 statusMessage,
+			Disposable:  lookup.Disposable,
+			Message:     statusMessage,
 		})
 	}
 }

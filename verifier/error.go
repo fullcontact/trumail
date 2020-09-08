@@ -31,7 +31,7 @@ const (
 type LookupError struct {
 	Message string `json:"message" xml:"message"`
 	Details string `json:"details" xml:"details"`
-	Fatal bool `json:"fatal" xml:"fatal"`
+	Fatal   bool   `json:"fatal" xml:"fatal"`
 }
 
 // newLookupError creates a new LookupError reference and

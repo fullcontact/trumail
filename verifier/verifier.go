@@ -2,18 +2,21 @@ package verifier
 
 // Verifier contains all dependencies needed to perform educated email
 // verification lookups
-type Verifier struct{ hostname, sourceAddr string }
+type Verifier struct {
+	hostname, sourceAddr string
+	disposabler          *Disposabler
+}
 
 // Lookup contains all output data for an email verification Lookup
 type Lookup struct {
 	Address
-	ValidFormat, Deliverable, FullInbox, HostExists, CatchAll bool
+	ValidFormat, Deliverable, FullInbox, HostExists, CatchAll, Disposable bool
 }
 
 // NewVerifier generates a new Verifier using the passed hostname and
 // source email address
 func NewVerifier(hostname, sourceAddr string) *Verifier {
-	return &Verifier{hostname, sourceAddr}
+	return &Verifier{hostname, sourceAddr, NewDisposabler()}
 }
 
 // Verify performs an email verification on the passed email address
@@ -42,6 +45,8 @@ func (v *Verifier) Verify(email string) (*Lookup, error) {
 
 	// Host exists if we've successfully formed a connection
 	l.HostExists = true
+
+	l.Disposable = v.disposabler.IsDisposable(address.Domain)
 
 	// Retrieve the catchall status and check deliverability
 	if del.HasCatchAll(3) {

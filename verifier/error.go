@@ -55,7 +55,6 @@ func ParseSMTPError(err error) *LookupError {
 		return nil
 	}
 	errStr := err.Error()
-
 	// Verify the length of the error before reading nil indexes
 	if len(errStr) < 3 {
 		return parseBasicErr(err)
@@ -80,7 +79,6 @@ func ParseSMTPError(err error) *LookupError {
 			"invalid address",
 			"recipient invalid",
 			"recipient rejected",
-			"address rejected",
 			"no mailbox") {
 			return nil
 		}

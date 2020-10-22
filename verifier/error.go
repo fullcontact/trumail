@@ -14,6 +14,7 @@ const (
 	ErrNoSuchHost        = "Mail server does not exist"
 	ErrServerUnavailable = "Mail server is unavailable"
 	ErrBlocked           = "Blocked by mail server"
+	ErrSPF               = "SPF Error"
 
 	// RCPT Errors
 	ErrTryAgainLater           = "Try again later"
@@ -113,6 +114,10 @@ func ParseSMTPError(err error) *LookupError {
 				"block list",
 				"denied") {
 				return newLookupError(ErrBlocked, errStr, true)
+			} else if insContains(errStr,
+				"SPF Sender",
+				"SPF Policy") {
+				return newLookupError(ErrSPF, errStr, true)
 			}
 			return nil
 		case 551:

@@ -2,18 +2,22 @@ package verifier
 
 // Verifier contains all dependencies needed to perform educated email
 // verification lookups
-type Verifier struct{ hostname, sourceAddr string }
+type Verifier struct {
+	hostname, sourceAddr string
+	disposabler          *Disposabler
+}
 
 // Lookup contains all output data for an email verification Lookup
 type Lookup struct {
 	Address
-	ValidFormat, Deliverable, FullInbox, HostExists, CatchAll bool
+	ValidFormat, Deliverable, FullInbox, HostExists, CatchAll, Disposable bool
+	ErrorDetails                                                     string
 }
 
 // NewVerifier generates a new Verifier using the passed hostname and
 // source email address
 func NewVerifier(hostname, sourceAddr string) *Verifier {
-	return &Verifier{hostname, sourceAddr}
+	return &Verifier{hostname, sourceAddr, NewDisposabler()}
 }
 
 // Verify performs an email verification on the passed email address
@@ -34,12 +38,19 @@ func (v *Verifier) Verify(email string) (*Lookup, error) {
 	// Attempt to form an SMTP Connection
 	del, err := NewDeliverabler(address.Domain, v.hostname, v.sourceAddr)
 	if err != nil {
-		return &l, ParseSMTPError(err)
+		l.ErrorDetails = err.Error()
+		if le := ParseSMTPError(err); le != nil && le.Fatal {
+			return nil, le
+		} else {
+			return &l, le
+		}
 	}
 	defer del.Close() // Defer close the SMTP connection
 
 	// Host exists if we've successfully formed a connection
 	l.HostExists = true
+
+	l.Disposable = v.disposabler.IsDisposable(address.Domain)
 
 	// Retrieve the catchall status and check deliverability
 	if del.HasCatchAll(3) {
@@ -47,6 +58,7 @@ func (v *Verifier) Verify(email string) (*Lookup, error) {
 		l.Deliverable = true
 	} else {
 		if err := del.IsDeliverable(address.Address, 3); err != nil {
+			l.ErrorDetails = err.Error()
 			if le := ParseSMTPError(err); le != nil {
 				if le.Message == ErrFullInbox {
 					l.FullInbox = true // set FullInbox and return no error

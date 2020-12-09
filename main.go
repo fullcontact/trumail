@@ -3,14 +3,16 @@ package main
 import (
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"strings"
 
-	"github.com/entrik/httpclient"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"github.com/sdwolfe32/trumail/api"
-	"github.com/sdwolfe32/trumail/verifier"
+	"github.com/fullcontact/trumail/api"
+	"github.com/fullcontact/trumail/verifier"
+	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"s32x.com/httpclient"
 )
 
 var (
@@ -33,6 +35,9 @@ func main() {
 	e.GET("/v1/:format/:email", api.LookupHandler(v), authMiddleware)
 	e.GET("/v1/health", api.HealthHandler(), authMiddleware)
 
+	p := prometheus.NewPrometheus("drt-trumail", nil)
+	p.Use(e)
+
 	// Listen and Serve
 	e.Logger.Fatal(e.Start(":" + port))
 }
@@ -41,7 +46,8 @@ func main() {
 // address retrieved via an API call on api.ipify.org
 func retrievePTR() string {
 	// Request the IP from ipify
-	ip, err := httpclient.GetString("https://api.ipify.org/")
+	c := httpclient.New().WithBaseURL("https://api.ipify.org")
+	ip, err := c.Get("/").WithExpectedStatus(http.StatusOK).String()
 	if err != nil {
 		log.Fatal("Failed to retrieve public IP")
 	}

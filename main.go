@@ -3,15 +3,16 @@ package main
 import (
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"strings"
-	"net/http"
 
+	"github.com/fullcontact/trumail/api"
+	"github.com/fullcontact/trumail/verifier"
+	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"s32x.com/httpclient"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"github.com/sdwolfe32/trumail/api"
-	"github.com/sdwolfe32/trumail/verifier"
 )
 
 var (
@@ -33,6 +34,9 @@ func main() {
 	// Bind the API endpoints to router
 	e.GET("/v1/:format/:email", api.LookupHandler(v), authMiddleware)
 	e.GET("/v1/health", api.HealthHandler(), authMiddleware)
+
+	p := prometheus.NewPrometheus("drt-trumail", nil)
+	p.Use(e)
 
 	// Listen and Serve
 	e.Logger.Fatal(e.Start(":" + port))

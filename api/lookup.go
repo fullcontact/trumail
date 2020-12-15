@@ -35,8 +35,8 @@ func LookupHandler(v *verifier.Verifier) echo.HandlerFunc {
 		if err != nil && lookup == nil {
 			return FormatEncoder(c, http.StatusInternalServerError, err)
 		} else if err != nil {
-			statusCode = http.StatusInternalServerError
-			statusMessage = err.Error()
+			statusCode = http.StatusNotFound
+			statusMessage = "OK"
 		}
 		return FormatEncoder(c, statusCode, &Lookup{
 			Address:           lookup.Address.Address,

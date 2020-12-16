@@ -42,7 +42,7 @@ func (v *Verifier) Verify(email string) (*Lookup, error) {
 		if le := ParseSMTPError(err); le != nil && le.Fatal {
 			return nil, le
 		} else {
-			return &l, le
+			return &l, nil
 		}
 	}
 	defer del.Close() // Defer close the SMTP connection
@@ -50,7 +50,10 @@ func (v *Verifier) Verify(email string) (*Lookup, error) {
 	// Host exists if we've successfully formed a connection
 	l.HostExists = true
 
-	l.Disposable = v.disposabler.IsDisposable(address.Domain)
+	if v.disposabler.IsDisposable(address.Domain) {
+		l.Disposable = true
+		return &l, nil
+	}
 
 	// Retrieve the catchall status and check deliverability
 	if del.HasCatchAll(3) {

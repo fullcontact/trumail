@@ -42,7 +42,7 @@ func (v *Verifier) Verify(email string) (*Lookup, error) {
 		if le := ParseSMTPError(err); le != nil && le.Fatal {
 			return nil, le
 		} else {
-			return &l, le
+			return &l, nil
 		}
 	}
 	defer del.Close() // Defer close the SMTP connection

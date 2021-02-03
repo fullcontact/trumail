@@ -75,7 +75,6 @@ func ParseSMTPError(err error) *LookupError {
 			"undeliverable",
 			"does not exist",
 			"may not exist",
-			"user unknown",
 			"user not found",
 			"invalid address",
 			"recipient invalid",
@@ -112,7 +111,8 @@ func ParseSMTPError(err error) *LookupError {
 				"blacklisted",
 				"blocked",
 				"block list",
-				"denied") {
+				"denied",
+				"user unknown") {
 				return newLookupError(ErrBlocked, errStr, true)
 			} else if insContains(errStr,
 				"SPF Sender",

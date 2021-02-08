@@ -60,51 +60,23 @@ func mailDialTimeout(domain string, timeout time.Duration) (*smtp.Client, error)
 		return nil, errors.New("No MX records found")
 	}
 
-	// Create a channel for receiving responses from
-	ch := make(chan interface{}, 1)
+	var lastErr error
 
-	// Done indicates if we're still waiting on dial responses
-	var done bool
-
-	// Attempt to connect to all SMTP servers concurrently
+	// Attempt to connect to all SMTP servers serially
 	for _, record := range records {
 		addr := record.Host + ":25"
-		go func() {
-			c, err := smtpDialTimeout(addr, timeout)
-			if err != nil {
-				if !done {
-					ch <- err
-				}
-				return
-			}
-
-			// Place the client on the channel or close it
-			switch {
-			case !done:
-				done = true
-				ch <- c
-			default:
-				c.Close()
-			}
-		}()
-	}
-
-	// Collect errors or return a client
-	var errSlice []error
-	for {
-		res := <-ch
-		switch r := res.(type) {
-		case *smtp.Client:
-			return r, nil
-		case error:
-			errSlice = append(errSlice, r)
-			if len(errSlice) == len(records) {
-				return nil, errSlice[0]
-			}
-		default:
-			return nil, errors.New("Unexpected response dialing SMTP server")
+		c, err := smtpDialTimeout(addr, timeout)
+		if err != nil {
+			lastErr = err
+		} else if c != nil {
+			return c, nil
 		}
 	}
+	if lastErr != nil {
+		return nil, lastErr
+	}
+	return nil, errors.New("Unexpected response dialing SMTP server")
+
 }
 
 // smtpDialTimeout is a timeout wrapper for smtp.Dial. It attempts to dial an

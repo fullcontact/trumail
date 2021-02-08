@@ -11,7 +11,7 @@ type Verifier struct {
 type Lookup struct {
 	Address
 	ValidFormat, Deliverable, FullInbox, HostExists, CatchAll, Disposable bool
-	ErrorDetails                                                     string
+	ErrorDetails                                                          string
 }
 
 // NewVerifier generates a new Verifier using the passed hostname and
@@ -66,6 +66,8 @@ func (v *Verifier) Verify(email string) (*Lookup, error) {
 				if le.Message == ErrFullInbox {
 					l.FullInbox = true // set FullInbox and return no error
 					return &l, nil
+				} else if le.Message == ErrBlocked {
+					return nil, le
 				}
 				return &l, le // Return if there's a true error
 			}

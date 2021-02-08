@@ -19,3 +19,10 @@ func TestParse550BlockedRCPTError(t *testing.T) {
 	assert.Equal(t, ErrBlocked, le.Message)
 	assert.Equal(t, err.Error(), le.Details)
 }
+
+func TestParse550UserUnkownRCPTError(t *testing.T) {
+	err := errors.New("550 5.1.1 User Unknown")
+	le := ParseSMTPError(err)
+	assert.Equal(t, ErrBlocked, le.Message)
+	assert.Equal(t, err.Error(), le.Details)
+}

@@ -127,7 +127,7 @@ func ParseSMTPError(err error) *LookupError {
 		case 553:
 			return newLookupError(ErrNoRelay, errStr, false)
 		case 554:
-			return newLookupError(ErrNotAllowed, errStr, false)
+			return newLookupError(ErrNotAllowed, errStr, true)
 		default:
 			return parseBasicErr(err)
 		}
